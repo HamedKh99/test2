@@ -100,25 +100,13 @@ class Store{
             }
         }
     }
-    private Product findProduct(Product product){
-        for (Product p : products.keySet()) {
-            if (p.equals(product))
-                return p;
-        }
-        return null;
-    }
     public void buy(Product product,int number){
         if (product.getPrice() * number > this.money){
             System.out.println("not enough money");
         }
         else{
             this.money -= product.getPrice() * number;
-            if(findProduct(product) != null){
-                products.put(findProduct(product),products.get(findProduct(product)) + number);
-            }
-            else {
-                products.put(product,number);
-            }
+            products.put(product,number);
         }
     }
     public void changePrice(String productName, int newPrice){
@@ -135,7 +123,7 @@ class Store{
             arrayOfProducts[r] = product;
             r++;
         }
-        Product temp = null;
+        Product temp;
         for (int i = 0; i < products.size(); i++) {
             for (int j = 1; j < products.size() - i; j++) {
                 if(products.get(arrayOfProducts[j - 1]) > products.get(arrayOfProducts[j])){
@@ -172,7 +160,7 @@ public class Main {
     private static void error2(){
         System.out.println("invalid input");
     }
-    private static boolean checkInvalidInput1(String[] details){
+    private static boolean isInvalidInput1(String[] details){
         for (int i = 3; i < details.length; i += 3) {
             if (i + 1 >= details.length)
                 return true;
@@ -181,7 +169,7 @@ public class Main {
         }
         return false;
     }
-    private static boolean checkInvalidInput2(String[] details){
+    private static boolean isInvalidInput2(String[] details){
         for (int i = 2; i < details.length; i += 3) {
             if(i + 3 >= details.length)
                 break;
@@ -194,27 +182,28 @@ public class Main {
         }
         return false;
     }
-    private static boolean checkInvalidInput3(String[] details){
+    private static boolean isInvalidInput3(String[] details){
         return details.length < 6;
     }
+
     public static void main(String[] args) {
         ShoppingCenter shoppingCenter = new ShoppingCenter();
         Scanner scanner = new Scanner(System.in);
         String input;
         while (true){
             input = scanner.nextLine();
-            if (input.equals("end"))
+            if (input.matches("end\\s*"))
                 break;
             else{
                 String[] details = input.split("\\s");
                 if (input.matches("add\\s.+")){
                     if (input.matches("add\\s\\d.+")){
-                        if (checkInvalidInput1(details) || checkInvalidInput2(details)) {
+                        if (isInvalidInput1(details) || isInvalidInput2(details)) {
                             error2();
                         }
                     }
                     else {
-                        if (checkInvalidInput1(details) || checkInvalidInput2(details)) {
+                        if (isInvalidInput1(details) || isInvalidInput2(details)) {
                             error2();
                         } else {
                             HashMap<Product, Integer> products = new HashMap<>();
@@ -236,7 +225,7 @@ public class Main {
                 }
 
                 else if (input.matches("buy\\sfor\\s.+")){
-                    if (checkInvalidInput3(details)){
+                    if (isInvalidInput3(details)){
                         error2();
                     }
                     else {
@@ -248,7 +237,7 @@ public class Main {
                 }
 
                 else if (input.matches("change\\sprice\\s.+")){
-                    if (checkInvalidInput3(details))
+                    if (isInvalidInput3(details))
                         error2();
                     else {
                         if (shoppingCenter.containsStore(details[4]))
