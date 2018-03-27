@@ -1,0 +1,273 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
+
+class Product {
+    private String name;
+    private int price;
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public int getPrice() {
+        return price;
+    }
+    public void setPrice(int price) {
+        this.price = price;
+    }
+    public boolean equals(Product product){
+        return this.name.equals(product.getName());
+    }
+}
+
+class ShoppingCenter {
+    private ArrayList<Store> stores = new ArrayList<>();
+    public void addStore(String storeName, HashMap<Product,Integer> products){
+        Store newStore = new Store();
+        newStore.start(storeName,products);
+        stores.add(newStore);
+    }
+    public void sell(String storeName, String productName, int number){
+        for (Store store : stores) {
+            if (store.getName().equals(storeName))
+                store.sell(productName, number);
+        }
+    }
+    public void buy(String storeName, String productName, int number, int price){
+        Product buyingProduct = new Product();
+        buyingProduct.setName(productName);
+        buyingProduct.setPrice(price);
+        for (Store store : stores) {
+            if (store.getName().equals(storeName)){
+                store.buy(buyingProduct,number);
+            }
+        }
+    }
+    public void changePrice(String storeName, String productName, int newPrice){
+        for (Store store : stores) {
+            if(store.getName().equals(storeName)){
+                store.changePrice(productName,newPrice);
+            }
+        }
+    }
+    public void show(String storeName){
+        for (Store store:stores) {
+            if (store.getName().equals(storeName))
+                store.show();
+        }
+    }
+    public boolean containsStore(String storeName){
+        for (Store store : stores) {
+            if (store.getName().equals(storeName))
+                return true;
+        }
+        return false;
+    }
+}
+
+class Store{
+    private String name;
+    private int money;
+    private HashMap<Product,Integer> products;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getName() {
+        return name;
+    }
+    public void start(String storeName, HashMap<Product,Integer> products){
+        this.setName(storeName);
+        this.money = 20;
+        this.products = products;
+    }
+    public HashMap<Product, Integer> getProducts() {
+        return products;
+    }
+    public void sell(String productName,int number){
+        for (Product product : products.keySet()) {
+            if(product.getName().equals(productName)){
+                if(products.get(product) < number) {
+                    System.out.println("we don't have it");
+                }
+                else {
+                    this.money += number * product.getPrice();
+                    products.replace(product,products.get(product) - number);
+                }
+            }
+        }
+    }
+    private Product findProduct(Product product){
+        for (Product p : products.keySet()) {
+            if (p.equals(product))
+                return p;
+        }
+        return null;
+    }
+    public void buy(Product product,int number){
+        if (product.getPrice() * number > this.money){
+            System.out.println("not enough money");
+        }
+        else{
+            this.money -= product.getPrice() * number;
+            if(findProduct(product) != null){
+                products.put(findProduct(product),products.get(findProduct(product)) + number);
+            }
+            else {
+                products.put(product,number);
+            }
+        }
+    }
+    public void changePrice(String productName, int newPrice){
+        for (Product product : products.keySet()) {
+            if (product.getName().equals(productName)){
+                product.setPrice(newPrice);
+            }
+        }
+    }
+    private Product[] getSortedProducts(){
+        Product[] arrayOfProducts = new Product[products.size()];
+        int r = 0;
+        for (Product product : products.keySet()) {
+            arrayOfProducts[r] = product;
+            r++;
+        }
+        Product temp = null;
+        for (int i = 0; i < products.size(); i++) {
+            for (int j = 1; j < products.size() - i; j++) {
+                if(products.get(arrayOfProducts[j - 1]) > products.get(arrayOfProducts[j])){
+                    temp = arrayOfProducts[j - 1];
+                    arrayOfProducts[j - 1] = arrayOfProducts[j];
+                    arrayOfProducts[j] = temp;
+                }
+                else if(products.get(arrayOfProducts[j - 1]).equals(products.get(arrayOfProducts[j]))){
+                    if (arrayOfProducts[j - 1].getName().compareTo(arrayOfProducts[j].getName()) > 0){
+                        temp = arrayOfProducts[j - 1];
+                        arrayOfProducts[j - 1] = arrayOfProducts[j];
+                        arrayOfProducts[j] = temp;
+                    }
+                }
+            }
+        }
+        return arrayOfProducts;
+    }
+    public void show(){
+        for (Product product : getSortedProducts()) {
+            if(products.get(product) != 0){
+                System.out.println(product.getName() + " " + products.get(product) + " " + product.getPrice());
+            }
+        }
+
+    }
+}
+
+public class Main {
+
+    private static void error1(){
+        System.out.println("no such store");
+    }
+    private static void error2(){
+        System.out.println("invalid input");
+    }
+    private static boolean checkInvalidInput1(String[] details){
+        for (int i = 3; i < details.length; i += 3) {
+            if (i + 1 >= details.length)
+                return true;
+            else if (!details[i].matches("\\d+") || !details[i + 1].matches("\\d+"))
+                return true;
+        }
+        return false;
+    }
+    private static boolean checkInvalidInput2(String[] details){
+        for (int i = 2; i < details.length; i += 3) {
+            if(i + 3 >= details.length)
+                break;
+            else {
+                for (int j = i + 3; j < details.length; j += 3) {
+                    if (details[i].equals(details[j]))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+    private static boolean checkInvalidInput3(String[] details){
+        return details.length < 6;
+    }
+    public static void main(String[] args) {
+        ShoppingCenter shoppingCenter = new ShoppingCenter();
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        while (true){
+            input = scanner.nextLine();
+            if (input.equals("end"))
+                break;
+            else{
+                String[] details = input.split("\\s");
+                if (input.matches("add\\s.+")){
+                    if (input.matches("add\\s\\d.+")){
+                        if (checkInvalidInput1(details) || checkInvalidInput2(details)) {
+                            error2();
+                        }
+                    }
+                    else {
+                        if (checkInvalidInput1(details) || checkInvalidInput2(details)) {
+                            error2();
+                        } else {
+                            HashMap<Product, Integer> products = new HashMap<>();
+                            for (int i = 2; i < details.length; i += 3) {
+                                Product product = new Product();
+                                product.setName(details[i]);
+                                product.setPrice(Integer.valueOf(details[i + 2]));
+                                products.put(product, Integer.valueOf(details[i + 1]));
+                            }
+                            shoppingCenter.addStore(details[1], products);
+                        }
+                    }
+                }
+                else if (input.matches("buy\\sfrom\\s.+")){
+                    if (shoppingCenter.containsStore(details[2]))
+                        shoppingCenter.sell(details[2],details[3],Integer.valueOf(details[4]));
+                    else
+                        error1();
+                }
+
+                else if (input.matches("buy\\sfor\\s.+")){
+                    if (checkInvalidInput3(details)){
+                        error2();
+                    }
+                    else {
+                        if (shoppingCenter.containsStore(details[2]))
+                            shoppingCenter.buy(details[2], details[3], Integer.valueOf(details[4]), Integer.valueOf(details[5]));
+                        else
+                            error1();
+                    }
+                }
+
+                else if (input.matches("change\\sprice\\s.+")){
+                    if (checkInvalidInput3(details))
+                        error2();
+                    else {
+                        if (shoppingCenter.containsStore(details[4]))
+                            shoppingCenter.changePrice(details[4], details[2], Integer.valueOf(details[5]));
+                        else
+                            error1();
+                    }
+                }
+
+                else if (input.matches("show\\s.+")){
+                    if(shoppingCenter.containsStore(details[1]))
+                        shoppingCenter.show(details[1]);
+                    else
+                        error1();
+                }
+                else
+                    error2();
+            }
+        }
+    }
+
+}
