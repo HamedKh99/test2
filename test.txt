@@ -200,8 +200,8 @@ class Cow {
     private Barband barband;
     private int noMilkDays;
     private HashMap<Food,Integer> feedInDay = new HashMap<>();
-    private int neededFood = 5 + age/10;
-    private int maxPower = 25 + 5*age/10;
+    private int neededFood;
+    private int maxPower;
     public static int maxAge = 50;
     public static int minWeight = 100;
 
@@ -215,6 +215,8 @@ class Cow {
         this.milk = 0;
         this.producedMilk = 0;
         this.noMilkDays = 0;
+        this.neededFood = 5;
+        this.maxPower = 25;
     }
 
     public int getId() {
@@ -247,6 +249,14 @@ class Cow {
 
     public Barband getBarband() {
         return barband;
+    }
+
+    public void increaseNeededFood(){
+        neededFood += (age - 1)/10;
+    }
+
+    public void increseMaxPower(){
+        maxPower += 5 * (age - 1)/ 10;
     }
 
     public int getNoMilkDays() {
@@ -993,6 +1003,8 @@ public class DairyFarm {
             cow.loseWeight();
             cow.gainWeight();
             cow.grow();
+            cow.increaseNeededFood();
+            cow.increseMaxPower();
             if (cow.getWeight() < Cow.minWeight || cow.getAge() > Cow.maxAge)
                 dyingCows.add(cow.getId());
         }
