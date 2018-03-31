@@ -2,261 +2,1194 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-class Product {
-    private String name;
-    private int price;
+class Barband {
+    private int id;
+    private ArrayList<Cow> cows = new ArrayList<>();
+    private int capacity;
+    private HashMap<Food,Integer> feed = new HashMap<>();
 
-    public String getName() {
-        return name;
+    public Barband(int id, int capacity) {
+        this.id = id;
+        this.capacity = capacity;
     }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public int getPrice() {
-        return price;
-    }
-    public void setPrice(int price) {
-        this.price = price;
-    }
-    public boolean equals(Product product){
-        return this.name.equals(product.getName());
-    }
-}
 
-class ShoppingCenter {
-    private ArrayList<Store> stores = new ArrayList<>();
-    public void addStore(String storeName, HashMap<Product,Integer> products){
-        Store newStore = new Store();
-        newStore.start(storeName,products);
-        stores.add(newStore);
+    public int getId() {
+        return id;
     }
-    public void sell(String storeName, String productName, int number){
-        for (Store store : stores) {
-            if (store.getName().equals(storeName))
-                store.sell(productName, number);
-        }
+
+    public ArrayList<Cow> getCows() {
+        return cows;
     }
-    public void buy(String storeName, String productName, int number, int price){
-        Product buyingProduct = new Product();
-        buyingProduct.setName(productName);
-        buyingProduct.setPrice(price);
-        for (Store store : stores) {
-            if (store.getName().equals(storeName)){
-                store.buy(buyingProduct,number);
-            }
-        }
+
+    public int getCapacity() {
+        return capacity;
     }
-    public void changePrice(String storeName, String productName, int newPrice){
-        for (Store store : stores) {
-            if(store.getName().equals(storeName)){
-                store.changePrice(productName,newPrice);
-            }
-        }
+
+    public HashMap<Food, Integer> getFeed() {
+        return feed;
     }
-    public void show(String storeName){
-        for (Store store:stores) {
-            if (store.getName().equals(storeName))
-                store.show();
-        }
+
+    public void addCow(Cow cow){
+        cows.add(cow);
     }
-    public boolean containsStore(String storeName){
-        for (Store store : stores) {
-            if (store.getName().equals(storeName))
+
+    private boolean hasFood(Food food){
+        for (Food f : feed.keySet()) {
+            if (f.getName().equals(food.getName()))
                 return true;
         }
         return false;
     }
-}
 
-class Store{
-    private String name;
-    private int money;
-    private HashMap<Product,Integer> products;
+    public void feedBarband(Food food, int amount){
+        if (hasFood(food)){
+            feed.replace(food,feed.get(food) + amount);
+        }
+        else {
+            feed.put(food,amount);
+        }
+    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-    public String getName() {
-        return name;
-    }
-    public void start(String storeName, HashMap<Product,Integer> products){
-        this.setName(storeName);
-        this.money = 20;
-        this.products = products;
-    }
-    public HashMap<Product, Integer> getProducts() {
-        return products;
-    }
-    public void sell(String productName,int number){
-        for (Product product : products.keySet()) {
-            if(product.getName().equals(productName)){
-                if(products.get(product) < number) {
-                    System.out.println("we don't have it");
+    private Cow[] getSortedCows(){
+        Cow[] sortedCows = new Cow[cows.size()];
+        sortedCows = cows.toArray(sortedCows);
+        Cow temp;
+        for (int i = 0; i < sortedCows.length; i++) {
+            for (int j = 1; j < sortedCows.length - i; j++) {
+                if (sortedCows[j - 1].getHunger() < sortedCows[j].getHunger()){
+                    temp = sortedCows[j - 1];
+                    sortedCows[j - 1] = sortedCows[j];
+                    sortedCows[j] = temp;
                 }
-                else {
-                    this.money += number * product.getPrice();
-                    products.replace(product,products.get(product) - number);
-                }
-            }
-        }
-    }
-    public void buy(Product product,int number){
-        if (product.getPrice() * number > this.money){
-            System.out.println("not enough money");
-        }
-        else{
-            this.money -= product.getPrice() * number;
-            products.put(product,number);
-        }
-    }
-    public void changePrice(String productName, int newPrice){
-        for (Product product : products.keySet()) {
-            if (product.getName().equals(productName)){
-                product.setPrice(newPrice);
-            }
-        }
-    }
-    private Product[] getSortedProducts(){
-        Product[] arrayOfProducts = new Product[products.size()];
-        int r = 0;
-        for (Product product : products.keySet()) {
-            arrayOfProducts[r] = product;
-            r++;
-        }
-        Product temp;
-        for (int i = 0; i < products.size(); i++) {
-            for (int j = 1; j < products.size() - i; j++) {
-                if(products.get(arrayOfProducts[j - 1]) > products.get(arrayOfProducts[j])){
-                    temp = arrayOfProducts[j - 1];
-                    arrayOfProducts[j - 1] = arrayOfProducts[j];
-                    arrayOfProducts[j] = temp;
-                }
-                else if(products.get(arrayOfProducts[j - 1]).equals(products.get(arrayOfProducts[j]))){
-                    if (arrayOfProducts[j - 1].getName().compareTo(arrayOfProducts[j].getName()) > 0){
-                        temp = arrayOfProducts[j - 1];
-                        arrayOfProducts[j - 1] = arrayOfProducts[j];
-                        arrayOfProducts[j] = temp;
+                else if (sortedCows[j - 1].getHunger() == sortedCows[j].getHunger()){
+                    if (sortedCows[j - 1].getAge() > sortedCows[j].getAge()){
+                        temp = sortedCows[j - 1];
+                        sortedCows[j - 1] = sortedCows[j];
+                        sortedCows[j] = temp;
+                    }
+                    else if (sortedCows[j - 1].getAge() == sortedCows[j].getAge()){
+                        if (sortedCows[j - 1].getId() > sortedCows[j].getId()){
+                            temp = sortedCows[j - 1];
+                            sortedCows[j - 1] = sortedCows[j];
+                            sortedCows[j] = temp;
+                        }
                     }
                 }
             }
         }
-        return arrayOfProducts;
+        return sortedCows;
     }
-    public void show(){
-        for (Product product : getSortedProducts()) {
-            if(products.get(product) != 0){
-                System.out.println(product.getName() + " " + products.get(product) + " " + product.getPrice());
+
+    private Food[] getSortedFeed(){
+        Food[] sortedFeed = new Food[feed.size()];
+        sortedFeed = feed.keySet().toArray(sortedFeed);
+        Food temp;
+        for (int i = 0; i < sortedFeed.length; i++) {
+            for (int j = 1; j < sortedFeed.length - i; j++) {
+                if (sortedFeed[j - 1].getInterestDegree() < sortedFeed[j].getInterestDegree()){
+                    temp = sortedFeed[j - 1];
+                    sortedFeed[j - 1] = sortedFeed[j];
+                    sortedFeed[j] = temp;
+                }
             }
         }
-
+        return sortedFeed;
     }
-}
 
-public class Main {
+    private int getAmountOfFeed(){
+        int amount = 0;
+        for (Food food : feed.keySet()) {
+            amount += feed.get(food);
+        }
+        return amount;
+    }
 
-    private static void error1(){
-        System.out.println("no such store");
-    }
-    private static void error2(){
-        System.out.println("invalid input");
-    }
-    private static boolean isInvalidInput1(String[] details){
-        for (int i = 3; i < details.length; i += 3) {
-            if (i + 1 >= details.length)
-                return true;
-            else if (!details[i].matches("\\d+") || !details[i + 1].matches("\\d+"))
+    private boolean areCowsHungry(){
+        for (Cow cow : cows) {
+            if (cow.getHunger() > 0)
                 return true;
         }
         return false;
     }
-    private static boolean isInvalidInput2(String[] details){
-        for (int i = 2; i < details.length; i += 3) {
-            if(i + 3 >= details.length)
+
+    public void feedCows(){
+        while (areCowsHungry() && getAmountOfFeed() > 0){
+            for (Cow cow : getSortedCows()) {
+                if (cow.getHunger() > 0 || getAmountOfFeed() > 0) {
+                    for (Food food : getSortedFeed()) {
+                        cow.eat(food);
+                        feed.replace(food, feed.get(food) - 1);
+                        if (feed.get(food) == 0)
+                            feed.remove(food);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public void removeCow(int cowId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId){
+                cows.remove(cow);
                 break;
+            }
+        }
+    }
+}
+
+class Storage {
+    private int capacity;
+    private HashMap<Food,Integer> feed = new HashMap<>();
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public HashMap<Food, Integer> getFeed() {
+        return feed;
+    }
+
+    public boolean hasEnoughFood(String foodName, int amount){
+        for (Food food : feed.keySet()) {
+            if (food.getName().equals(foodName)){
+                return feed.get(food) >= amount;
+            }
+        }
+        return false;
+    }
+
+    public void decreaseFood(String foodName, int amount){
+        for (Food food : feed.keySet()) {
+            if (food.getName().equals(foodName)) {
+                feed.replace(food, feed.get(food) - amount);
+                break;
+            }
+        }
+    }
+
+    private boolean hasFood(Food food) {
+        for (Food f : feed.keySet()) {
+            if (f.getName().equals(food.getName()))
+                return true;
+        }
+        return false;
+    }
+
+    public void addFood(Food food, int amount){
+        if (hasFood(food)){
+            feed.replace(food,feed.get(food) + amount);
+        }
+        else {
+            feed.put(food,amount);
+        }
+    }
+
+    public void increaseCapacity(int amount){
+        capacity += amount;
+    }
+}
+
+class Cow {
+    private int id;
+    private int age;
+    private int hunger;
+    private int weight;
+    private int milk;
+    private int producedMilk;
+    private Barband barband;
+    private int noMilkDays;
+    private HashMap<Food,Integer> feedInDay = new HashMap<>();
+    private int neededFood = 5 + age/10;
+    private int maxPower = 25 + 5*age/10;
+    public static int maxAge = 50;
+    public static int minWeight = 100;
+
+
+    public Cow(int id, Barband barband) {
+        this.id = id;
+        this.barband = barband;
+        this.weight = 200;
+        this.age = 0;
+        this.hunger = 0;
+        this.milk = 0;
+        this.producedMilk = 0;
+        this.noMilkDays = 0;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public int getHunger() {
+        return hunger;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public int getMilk() {
+        return milk;
+    }
+
+    public int getMaxPower() {
+        return maxPower;
+    }
+
+    public int getProducedMilk() {
+        return producedMilk;
+    }
+
+    public Barband getBarband() {
+        return barband;
+    }
+
+    public int getNoMilkDays() {
+        return noMilkDays;
+    }
+
+    public int getNeededFood() {
+        return neededFood;
+    }
+
+    public void makeHungry(){
+        hunger += neededFood;
+        feedInDay.clear();
+    }
+
+    public void loseWeight(){
+        weight -= hunger;
+    }
+
+    public void gainWeight(){
+        for (Food food : feedInDay.keySet()) {
+            weight += feedInDay.get(food) * food.getWeightPerKilo();
+        }
+    }
+
+    private boolean hasEatenFood(Food food){
+        for (Food f : feedInDay.keySet()) {
+            if (f.getName().equals(food.getName()))
+                return true;
+        }
+        return false;
+    }
+
+    public void eat(Food food){
+        hunger -= 1;
+        if (hasEatenFood(food))
+            feedInDay.replace(food,feedInDay.get(food) + 1);
+        else
+            feedInDay.put(food,1);
+    }
+
+    public void produceMilk(){
+        for (Food food : feedInDay.keySet()) {
+            this.milk += feedInDay.get(food) * food.getMilkPerKilo();
+        }
+        if (milk > maxPower)
+            milk = maxPower;
+    }
+
+    public void milk() {
+        this.producedMilk += this.milk;
+        this.milk = 0;
+        noMilkDays = 0;
+    }
+
+    public void move(Barband barband){
+        this.barband = barband;
+    }
+
+    public void increaseNoMilkDays(){
+        noMilkDays++;
+    }
+
+    public void dryMilk(){
+        milk = 0;
+    }
+
+    public void grow(){
+        age++;
+    }
+}
+
+class Food {
+    private String name;
+    private int milkPerKilo;
+    private int weightPerKilo;
+    private int interestDegree;
+
+    public Food(String name, int milkPerKilo, int weightPerKilo, int interestDegree) {
+        this.name = name;
+        this.milkPerKilo = milkPerKilo;
+        this.weightPerKilo = weightPerKilo;
+        this.interestDegree = interestDegree;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getMilkPerKilo() {
+        return milkPerKilo;
+    }
+
+    public int getWeightPerKilo() {
+        return weightPerKilo;
+    }
+
+    public int getInterestDegree() {
+        return interestDegree;
+    }
+}
+
+class Tank {
+    private int id;
+    private int capacity;
+    private int emptySpace;
+    private int[] expirationDate = new int[3];
+
+    public Tank(int id, int capacity) {
+        this.id = id;
+        this.capacity = capacity;
+        this.emptySpace = capacity;
+        expirationDate[0] = expirationDate[1] = expirationDate[2] = 0;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public int getEmptySpace() {
+        return emptySpace;
+    }
+
+    public int[] getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(int[] date) {
+        expirationDate[2] = date[2] + 3;
+        expirationDate[1] = date[1];
+        expirationDate[0] = date[0];
+        if (expirationDate[2] > 30){
+            expirationDate[2] -= 30;
+            expirationDate[1] += 1;
+            if (expirationDate[1] > 12){
+                expirationDate[1] = 1;
+                expirationDate[0] += 1;
+            }
+        }
+    }
+
+    public void addMilk(int amount){
+        this.emptySpace -= amount;
+    }
+
+    public void sellMilk(int amount){
+        this.emptySpace += amount;
+    }
+
+    public void empty(){
+        this.emptySpace = capacity;
+
+    }
+}
+
+class View {
+
+    public Scanner scanner = new Scanner(System.in);
+
+    private Food[] getSortedFeed(HashMap<Food,Integer> feed){
+        Food[] sortedFeed = new Food[feed.size()];
+        sortedFeed = feed.keySet().toArray(sortedFeed);
+        Food temp;
+        for (int i = 0; i < sortedFeed.length; i++) {
+            for (int j = 1; j < sortedFeed.length - i; j++) {
+                if (sortedFeed[j - 1].getInterestDegree() < sortedFeed[j].getInterestDegree()){
+                    temp = sortedFeed[j - 1];
+                    sortedFeed[j - 1] = sortedFeed[j];
+                    sortedFeed[j] = temp;
+                }
+            }
+        }
+        return sortedFeed;
+    }
+
+    private Tank[] getSortedTanks(ArrayList<Tank> tanks){
+        Tank[] sortedTanks = new Tank[tanks.size()];
+        sortedTanks = tanks.toArray(sortedTanks);
+        Tank temp;
+        for (int i = 0; i < sortedTanks.length; i++) {
+            for (int j = 1; j < sortedTanks.length - i; j++) {
+                if (sortedTanks[j - 1].getId() > sortedTanks[j].getId()){
+                    temp = sortedTanks[j - 1];
+                    sortedTanks[j - 1] = sortedTanks[j];
+                    sortedTanks[j] = temp;
+                }
+            }
+        }
+        return sortedTanks;
+    }
+
+    private Cow[] getSortedCows(ArrayList<Cow> cows){
+        Cow[] sortedCows = new Cow[cows.size()];
+        sortedCows = cows.toArray(sortedCows);
+        Cow temp;
+        for (int i = 0; i < sortedCows.length; i++) {
+            for (int j = 1; j < sortedCows.length - i; j++) {
+                if (sortedCows[j - 1].getProducedMilk() < sortedCows[j].getProducedMilk()){
+                    temp = sortedCows[j - 1];
+                    sortedCows[j - 1] = sortedCows[j];
+                    sortedCows[j] = temp;
+                }
+                else if (sortedCows[j - 1].getProducedMilk() == sortedCows[j].getProducedMilk()){
+                    if (sortedCows[j - 1].getId() > sortedCows[j].getId()){
+                        temp = sortedCows[j - 1];
+                        sortedCows[j - 1] = sortedCows[j];
+                        sortedCows[j] = temp;
+                    }
+                }
+            }
+        }
+        return sortedCows;
+    }
+
+    private int[] bubbleSort(int[] cowsId){
+        int temp;
+        for (int i = 0; i < cowsId.length; i++) {
+            for (int j = 1; j < cowsId.length - i; j++) {
+                if (cowsId[j - 1] > cowsId[j]){
+                    temp = cowsId[j - 1];
+                    cowsId[j - 1] = cowsId[j];
+                    cowsId[j] = temp;
+                }
+            }
+        }
+        return cowsId;
+    }
+
+    public void showBarband(Barband barband){
+        System.out.println("barband " + barband.getId());
+        System.out.println("number of cows: " + barband.getCows().size());
+        System.out.println("capacity: " + barband.getCapacity());
+        System.out.println("the remaining food:");
+        for (Food food : getSortedFeed(barband.getFeed())) {
+            System.out.println(food.getName() + " " + barband.getFeed().get(food));
+        }
+        System.out.println("cows:");
+        int[] cowsId = new int[barband.getCows().size()];
+        int itr = 0;
+        for (Cow cow : barband.getCows()) {
+            cowsId[itr] = cow.getId();
+            itr++;
+        }
+        for (int i : bubbleSort(cowsId)) {
+            System.out.println(i);
+        }
+    }
+
+    public void showCow(Cow cow){
+        System.out.println("cow " + cow.getId());
+        System.out.println("age: " + cow.getAge());
+        System.out.println("hunger: " + cow.getHunger());
+        System.out.println("weight: " + cow.getWeight());
+        System.out.println("milk: " + cow.getMilk());
+        System.out.println("milk produced: " + cow.getProducedMilk());
+    }
+
+    public void printInvalidDate(){
+        System.out.println("invalid date");
+    }
+
+    public void printInvalidBarband(){
+        System.out.println("invalid barband");
+    }
+
+    public void printInvalidCow(){
+        System.out.println("invalid cow");
+    }
+
+    public void printNotEnoughSpace(int barbandId){
+        System.out.println("there is not enough space in barband " + barbandId);
+    }
+
+    public void printNotEnoughSpace(){
+        System.out.println("there is not enough space");
+    }
+
+    public void printNoMilk(){
+        System.out.println("cow has no milk");
+    }
+
+    public void printMilkedSuccess(){
+        System.out.println("cow milked successfully");
+    }
+
+    public void printCowAdded(int cowId){
+        System.out.println("cow added. cow num: " + cowId);
+    }
+
+    public void showFarm(DairyFarm dairyFarm){
+        System.out.println("dairy farm");
+        System.out.println("number of barbands: " + dairyFarm.getBarbands().size());
+        System.out.println("number of cows: " + dairyFarm.getCows().size());
+        System.out.println("storage capacity: " + dairyFarm.getStorage().getCapacity());
+        System.out.println("milk tank num: " + dairyFarm.getTanks().size());
+        System.out.println("max milk production: " + dairyFarm.getMaxMilkProduction());
+    }
+
+    public void showStorage(Storage storage){
+        System.out.println("storage");
+        System.out.println("capacity: " + storage.getCapacity());
+        System.out.println("inventory:");
+        for (Food food : getSortedFeed(storage.getFeed())) {
+            System.out.println(food.getName() + " " + storage.getFeed().get(food));
+        }
+    }
+
+    public void showTanks(ArrayList<Tank> tanks){
+        for (Tank tank : getSortedTanks(tanks)) {
+            System.out.println("tank " + tank.getId());
+            System.out.println("capacity: " + tank.getCapacity());
+            System.out.println("empty space: " + tank.getEmptySpace());
+            if (tank.getEmptySpace() != tank.getCapacity()) {
+                if (tank.getExpirationDate()[2] > 10 && tank.getExpirationDate()[1] > 10)
+                System.out.println("expiration date: " + tank.getExpirationDate()[0] +
+                        "/" + tank.getExpirationDate()[1] + "/" + tank.getExpirationDate()[2]);
+                else if (tank.getExpirationDate()[2] > 10 && tank.getExpirationDate()[1] < 10)
+                    System.out.println("expiration date: " + tank.getExpirationDate()[0] +
+                            "/" + "0" + tank.getExpirationDate()[1] + "/" + tank.getExpirationDate()[2]);
+                if (tank.getExpirationDate()[2] < 10 && tank.getExpirationDate()[1] > 10)
+                    System.out.println("expiration date: " + tank.getExpirationDate()[0] +
+                            "/" + tank.getExpirationDate()[1] + "/" + "0" + tank.getExpirationDate()[2]);
+                else if (tank.getExpirationDate()[2] < 10 && tank.getExpirationDate()[1] < 10)
+                    System.out.println("expiration date: " + tank.getExpirationDate()[0] +
+                        "/" + "0" + tank.getExpirationDate()[1] + "/" + "0" + tank.getExpirationDate()[2]);
+            }
+            else
+                System.out.println("expiration date:");
+        }
+    }
+
+    public void printInvalidfood(){
+        System.out.println("invalid food name");
+    }
+
+    public void printNotEnoughMilk(){
+        System.out.println("there is not enough milk");
+    }
+
+    public void printSellSuccess(){
+        System.out.println("milk sold successfully");
+    }
+
+    public void printButcherSuccess(){
+        System.out.println("cow butchered successfully");
+    }
+
+    public void printMoveSuccess(){
+        System.out.println("cow moved successfully");
+    }
+
+    public void printInvalidTank(){
+        System.out.println("invalid tank");
+    }
+
+    public void showRanks(ArrayList<Cow> cows){
+        for (Cow cow : getSortedCows(cows)) {
+            System.out.print(cow.getId());
+            System.out.print(" ");
+            System.out.println(cow.getProducedMilk());
+        }
+    }
+
+    public void printInvalidCommand(){
+        System.out.println("invalid command");
+    }
+}
+
+public class DairyFarm {
+    private ArrayList<Barband> barbands = new ArrayList<>();
+    private ArrayList<Cow> cows = new ArrayList<>();
+    private ArrayList<Tank> tanks = new ArrayList<>();
+    private ArrayList<Food> feed = new ArrayList<>();
+    private Storage storage = new Storage();
+    private View view = new View();
+    private int[] date = new int[3];
+    private int barbandIdGenerator = 0;
+    private int tankIdGenerator = 0;
+    private int maxMilkProduction;
+
+    public DairyFarm() {
+        addFoodToFeed("barley",4,4,80);
+        addFoodToFeed("alfalfa",3,3,60);
+        addFoodToFeed("straw",2,0,20);
+        maxMilkProduction = 0;
+    }
+
+    public ArrayList<Barband> getBarbands() {
+        return barbands;
+    }
+
+    public ArrayList<Cow> getCows() {
+        return cows;
+    }
+
+    public ArrayList<Tank> getTanks() {
+        return tanks;
+    }
+
+    public Storage getStorage() {
+        return storage;
+    }
+
+    public int getMaxMilkProduction() {
+        for (Cow cow : cows) {
+            maxMilkProduction += cow.getMaxPower();
+        }
+        return maxMilkProduction;
+    }
+
+    private void setDate(String date) {
+        int year = Integer.valueOf(date.split("/")[0]);
+        int month = Integer.valueOf(date.split("/")[1]);
+        int day = Integer.valueOf(date.split("/")[2]);
+        this.date[0] = year;
+        this.date[1] = month;
+        this.date[2] = day;
+    }
+
+    private boolean isValidDate(String date){
+        if (!date.matches("\\d{4}/\\d{2}/\\d{2}"))
+            return false;
+        else {
+            String[] details = date.split("/");
+            if (details[0].charAt(0) == '0' || Integer.valueOf(details[1]) > 12 || Integer.valueOf(details[2]) > 30
+                    || Integer.valueOf(details[1]) == 0 || Integer.valueOf(details[2]) == 0)
+                return false;
+        }
+        return true;
+    }
+
+    private void addBarband(int capacity){
+        barbandIdGenerator++;
+        Barband newBarband = new Barband(barbandIdGenerator, capacity);
+        barbands.add(newBarband);
+    }
+
+    private boolean isValidBarband(int barbandId){
+        for (Barband barband : barbands) {
+            if (barband.getId() == barbandId)
+                return true;
+        }
+        return false;
+    }
+
+    private void showBarband(int barbandId){
+        for (Barband barband : barbands) {
+            if (barband.getId() == barbandId) {
+                view.showBarband(barband);
+                break;
+            }
+        }
+    }
+
+    private boolean isValidCow(int cowId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId)
+                return true;
+        }
+        return false;
+    }
+
+    private void showCow(int cowId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId) {
+                view.showCow(cow);
+                break;
+            }
+        }
+    }
+
+    private boolean hasBarbandSpace(int barbandId){
+        for (Barband barband : barbands) {
+            if (barband.getId() == barbandId)
+                return barband.getCapacity() > barband.getCows().size();
+        }
+        return false;
+    }
+
+    private int[] getCowsId(){
+        int[] cowsId = new int[cows.size()];
+        int itr = 0;
+        for (Cow cow : cows) {
+            cowsId[itr] = cow.getId();
+            itr++;
+        }
+        for (int i = 0; i < cowsId.length; i++) {
+            for (int j = 1; j < cowsId.length - i; j++) {
+                int temp;
+                if (cowsId[j - 1] > cowsId[j]){
+                    temp = cowsId[j - 1];
+                    cowsId[j - 1] = cowsId[j];
+                    cowsId[j] = temp;
+                }
+            }
+        }
+        return cowsId;
+    }
+
+    private void addCow(int barbandId){
+        int cowIdGenerator;
+        if (cows.size() == 0)
+            cowIdGenerator = 1;
+        else{
+            if (getCowsId()[cows.size() - 1] == cows.size()) {
+                cowIdGenerator = cows.size() + 1;
+            }
             else {
-                for (int j = i + 3; j < details.length; j += 3) {
-                    if (details[i].equals(details[j]))
-                        return true;
+                cowIdGenerator = 1;
+                for (int i : getCowsId()) {
+                    if (cowIdGenerator != i) {
+                        break;
+                    }
+                    cowIdGenerator++;
+                }
+            }
+        }
+        for (Barband barband : barbands) {
+            if (barband.getId() == barbandId){
+                Cow newCow = new Cow(cowIdGenerator, barband);
+                barband.addCow(newCow);
+                cows.add(newCow);
+                break;
+            }
+        }
+        view.printCowAdded(cowIdGenerator);
+    }
+
+    private void addTank(int capacity){
+        tankIdGenerator++;
+        Tank newTank = new Tank(tankIdGenerator, capacity);
+        tanks.add(newTank);
+    }
+
+    private boolean hasFoodInStorage(String foodName, int amount){
+        return storage.hasEnoughFood(foodName, amount);
+    }
+
+    private void feedBarband(int barbandId, String foodName, int amount){
+        for (Barband barband : barbands) {
+            if (barband.getId() == barbandId){
+                for (Food food : feed) {
+                    if (food.getName().equals(foodName)) {
+                        barband.feedBarband(food, amount);
+                        storage.decreaseFood(foodName,amount);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void feedCows(int barbandId){
+        for (Barband barband : barbands) {
+            if (barband.getId() == barbandId){
+                barband.feedCows();
+                break;
+            }
+        }
+    }
+
+    private void showStorage(){
+        view.showStorage(storage);
+    }
+
+    private void showTanks(){
+        view.showTanks(tanks);
+    }
+
+    private boolean hasTankSpace(int cowId, int tankId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId){
+                for (Tank tank : tanks) {
+                    if (tank.getId() == tankId){
+                        return cow.getMilk() <= tank.getEmptySpace();
+                    }
                 }
             }
         }
         return false;
     }
-    private static boolean isInvalidInput3(String[] details){
-        return details.length < 6;
+
+    private boolean hasCowMilk(int cowId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId)
+                return cow.getMilk() > 0;
+        }
+        return false;
+    }
+
+    private void milkCow(int cowId, int tankId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId){
+                for (Tank tank : tanks) {
+                    if (tank.getId() == tankId){
+                        if (tank.getEmptySpace() == tank.getCapacity()){
+                            tank.setExpirationDate(date);
+                        }
+                        tank.addMilk(cow.getMilk());
+                        cow.milk();
+                        view.printMilkedSuccess();
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isValidFood(String foodName){
+        for (Food food : feed) {
+            if (food.getName().equals(foodName))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean hasStorageSpace(int amount){
+        int emptySpace = storage.getCapacity();
+        for (Food food : storage.getFeed().keySet()) {
+            emptySpace -= storage.getFeed().get(food);
+        }
+        return amount <= emptySpace;
+    }
+
+    private void addFoodToStorage(String foodName, int amount){
+        for (Food food : feed) {
+            if (food.getName().equals(foodName)){
+                storage.addFood(food,amount);
+                break;
+            }
+        }
+    }
+
+    private boolean isValidTank(int tankId){
+        for (Tank tank : tanks) {
+            if (tank.getId() == tankId)
+                return true;
+        }
+        return false;
+    }
+
+    private boolean isMilkExpired(int tankId){
+        for (Tank tank : tanks) {
+            if (tank.getId() == tankId){
+                if (date[0] > tank.getExpirationDate()[0])
+                    return true;
+                else if (date[0] == tank.getExpirationDate()[0]){
+                    if (date[1] > tank.getExpirationDate()[1])
+                        return true;
+                    else if (date[1] == tank.getExpirationDate()[1]){
+                        if (date[2] > tank.getExpirationDate()[2])
+                            return true;
+                    }
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasEnoughMilk(int tankId, int amount){
+        for (Tank tank : tanks) {
+            if (tank.getId() == tankId){
+                return tank.getCapacity() - tank.getEmptySpace() >= amount;
+            }
+        }
+        return false;
+    }
+
+    private void sellMilk(int tankId, int amount){
+        for (Tank tank : tanks) {
+            if (tank.getId() == tankId){
+                tank.sellMilk(amount);
+                break;
+            }
+        }
+        view.printSellSuccess();
+    }
+
+    private void emptyTank(int tankId){
+        for (Tank tank : tanks) {
+            if (tank.getId() == tankId){
+                tank.empty();
+                break;
+            }
+        }
+    }
+
+    private void cowDie(int cowId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId){
+                for (Barband barband : barbands) {
+                    if (barband.getId() == cow.getBarband().getId()){
+                        barband.removeCow(cowId);
+                        break;
+                    }
+                }
+                cows.remove(cow);
+                break;
+            }
+        }
+    }
+
+    private void moveCow(int cowId, int barbandId){
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId){
+                for (Barband barband : barbands) {
+                    if (barband.getId() == cow.getBarband().getId())
+                        barband.removeCow(cowId);
+                }
+            }
+        }
+        for (Cow cow : cows) {
+            if (cow.getId() == cowId){
+                for (Barband barband : barbands) {
+                    if (barband.getId() == barbandId) {
+                        cow.move(barband);
+                        barband.addCow(cow);
+                    }
+                }
+            }
+        }
+
+        view.printMoveSuccess();
+    }
+
+    public void increaseStorage(int amount){
+        storage.increaseCapacity(amount);
+    }
+
+    private void addFoodToFeed(String foodName, int milkPerKilo, int weightPerKilo, int interestDegree){
+        Food newFood = new Food(foodName,milkPerKilo,weightPerKilo,interestDegree);
+        feed.add(newFood);
+    }
+
+    public void passDay(){
+        ArrayList<Integer> dyingCows = new ArrayList<>();
+        for (Cow cow : cows) {
+            if (cow.getMilk() > 0)
+                cow.increaseNoMilkDays();
+            cow.loseWeight();
+            cow.gainWeight();
+            cow.grow();
+            if (cow.getWeight() < Cow.minWeight || cow.getAge() > Cow.maxAge)
+                dyingCows.add(cow.getId());
+        }
+        for (Integer dyingCow : dyingCows) {
+            cowDie(dyingCow);
+        }
+        dyingCows.clear();
+        date[2]++;
+        if (date[2] > 30){
+            date[2] = 1;
+            date[1]++;
+            if (date[1] > 12) {
+                date[1] = 1;
+                date[0]++;
+            }
+        }
+        for (Cow cow : cows) {
+            if (cow.getNoMilkDays() < 3)
+                cow.produceMilk();
+            else
+                cow.dryMilk();
+            cow.makeHungry();
+        }
+        for (Barband barband : barbands) {
+            barband.feedCows();
+        }
+        for (Cow cow : cows) {
+            if (cow.getHunger() >= 4*cow.getNeededFood())
+                dyingCows.add(cow.getId());
+        }
+        for (Integer dyingCow : dyingCows) {
+            cowDie(dyingCow);
+        }
+        dyingCows.clear();
+    }
+
+    private void manageDairyFarm(){
+        System.out.println("set date");
+        String input;
+        while (true){
+            input = view.scanner.nextLine();
+            if (isValidDate(input)) {
+                setDate(input);
+                break;
+            }
+            else
+                view.printInvalidDate();
+        }
+        while (true) {
+            input = view.scanner.nextLine();
+            if (input.equals("end"))
+                break;
+            else if (input.matches("add\\sbarband\\s\\d+")) {
+                addBarband(Integer.valueOf(input.split("\\s")[2]));
+            }
+            else if (input.matches("status\\sbarband\\s\\d+")){
+                if (!isValidBarband(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidBarband();
+                else
+                    showBarband(Integer.valueOf(input.split("\\s")[2]));
+            }
+            else if (input.matches("status\\scow\\s\\d+")){
+                if (!isValidCow(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidCow();
+                else
+                    showCow(Integer.valueOf(input.split("\\s")[2]));
+            }
+            else if (input.matches("add\\scow\\s\\d+")){
+                if (hasBarbandSpace(Integer.valueOf(input.split("\\s")[2])))
+                    addCow(Integer.valueOf(input.split("\\s")[2]));
+                else
+                    view.printNotEnoughSpace(Integer.valueOf(input.split("\\s")[2]));
+            }
+            else if (input.matches("add\\stank\\s\\d+")){
+                addTank(Integer.valueOf(input.split("\\s")[2]));
+            }
+            else if (input.equals("status farm")){
+                view.showFarm(this);
+            }
+            else if (input.matches("feed\\sbarband\\s\\d+")){
+                if (!isValidBarband(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidBarband();
+                else {
+                    int barbandId = Integer.valueOf(input.split("\\s")[2]);
+                    while (true){
+                        input = view.scanner.nextLine();
+                        if (input.equals("end_feed"))
+                            break;
+                        else {
+                            if (hasFoodInStorage(input.split("\\s")[0],Integer.valueOf(input.split("\\s")[1]))){
+                                feedBarband(barbandId,input.split("\\s")[0],Integer.valueOf(input.split("\\s")[1]));
+                            }
+                        }
+                    }
+                    feedCows(barbandId);
+                }
+            }
+            else if (input.equals("status storage")){
+                showStorage();
+            }
+            else if (input.equals("status tanks")){
+                showTanks();
+            }
+            else if (input.matches("milk\\scow\\s\\d+\\s\\d+")){
+                if (!isValidCow(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidCow();
+                else if (!isValidTank(Integer.valueOf(input.split("\\s")[3])))
+                    view.printInvalidTank();
+                else {
+                    if (!hasCowMilk(Integer.valueOf(input.split("\\s")[2])))
+                        view.printNoMilk();
+                    else if (!hasTankSpace(Integer.valueOf(input.split("\\s")[2]),Integer.valueOf(input.split("\\s")[3])))
+                        view.printNotEnoughSpace();
+                    else
+                        milkCow(Integer.valueOf(input.split("\\s")[2]),Integer.valueOf(input.split("\\s")[3]));
+                }
+            }
+            else if (input.matches("add\\sstorage\\s.+\\s\\d+")){
+                if (!isValidFood(input.split("\\s")[2]))
+                    view.printInvalidfood();
+                else if (!hasStorageSpace(Integer.valueOf(input.split("\\s")[3])))
+                    view.printNotEnoughSpace();
+                else
+                    addFoodToStorage(input.split("\\s")[2],Integer.valueOf(input.split("\\s")[3]));
+            }
+            else if (input.matches("sell\\smilk\\s\\d+\\s\\d+")){
+                if (!isValidTank(Integer.valueOf(input.split("\\s")[3])))
+                    view.printInvalidTank();
+                else {
+                    if (!hasEnoughMilk(Integer.valueOf(input.split("\\s")[3]), Integer.valueOf(input.split("\\s")[2]))
+                            || isMilkExpired(Integer.valueOf(input.split("\\s")[3]))) {
+                        view.printNotEnoughMilk();
+                    } else {
+                        sellMilk(Integer.valueOf(input.split("\\s")[3]), Integer.valueOf(input.split("\\s")[2]));
+                    }
+                }
+            }
+            else if (input.matches("empty\\stank\\s\\d+")){
+                if (!isValidTank(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidTank();
+                else
+                    emptyTank(Integer.valueOf(input.split("\\s")[2]));
+            }
+            else if (input.matches("butcher\\scow\\s\\d+")){
+                if (!isValidCow(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidCow();
+                else {
+                    cowDie(Integer.valueOf(input.split("\\s")[2]));
+                    view.printButcherSuccess();
+                }
+            }
+            else if (input.matches("move\\scow\\s\\d+\\s\\d+")){
+                if (!isValidCow(Integer.valueOf(input.split("\\s")[2])))
+                    view.printInvalidCow();
+                else if (!isValidBarband(Integer.valueOf(input.split("\\s")[3])))
+                    view.printInvalidBarband();
+                else {
+                    if (!hasBarbandSpace(Integer.valueOf(input.split("\\s")[3])))
+                        view.printNotEnoughSpace(Integer.valueOf(input.split("\\s")[3]));
+                    else
+                        moveCow(Integer.valueOf(input.split("\\s")[2]),Integer.valueOf(input.split("\\s")[3]));
+                }
+            }
+            else if (input.equals("show ranks")){
+                view.showRanks(cows);
+            }
+            else if (input.matches("increase\\sstorage\\scapacity\\s\\d+")){
+                increaseStorage(Integer.valueOf(input.split("\\s")[3]));
+            }
+            else if (input.matches("add\\snew\\sfood\\s.+\\s\\d+")){
+                if (!hasStorageSpace(Integer.valueOf(input.split("\\s")[4])))
+                    view.printNotEnoughSpace();
+                else {
+                    String foodName = input.split("\\s")[3];
+                    int amount = Integer.valueOf(input.split("\\s")[4]);
+                    input = view.scanner.nextLine();
+                    int milkPerKilo = Integer.valueOf(input);
+                    input = view.scanner.nextLine();
+                    int weightPerKilo = Integer.valueOf(input);
+                    input = view.scanner.nextLine();
+                    int interestDegree = Integer.valueOf(input);
+                    addFoodToFeed(foodName,milkPerKilo,weightPerKilo,interestDegree);
+                    addFoodToStorage(foodName,amount);
+                }
+            }
+            else if (input.equals("day passed")){
+                passDay();
+            }
+            else {
+                view.printInvalidCommand();
+            }
+        }
     }
 
     public static void main(String[] args) {
-        ShoppingCenter shoppingCenter = new ShoppingCenter();
-        Scanner scanner = new Scanner(System.in);
-        String input;
-        while (true){
-            input = scanner.nextLine();
-            if (input.matches("end\\s*"))
-                break;
-            else{
-                String[] details = input.split("\\s");
-                if (input.matches("add\\s.+")){
-                    if (input.matches("add\\s\\d.+")){
-                        if (isInvalidInput1(details) || isInvalidInput2(details)) {
-                            error2();
-                        }
-                    }
-                    else {
-                        if (isInvalidInput1(details) || isInvalidInput2(details)) {
-                            error2();
-                        } else {
-                            HashMap<Product, Integer> products = new HashMap<>();
-                            for (int i = 2; i < details.length; i += 3) {
-                                Product product = new Product();
-                                product.setName(details[i]);
-                                product.setPrice(Integer.valueOf(details[i + 2]));
-                                products.put(product, Integer.valueOf(details[i + 1]));
-                            }
-                            shoppingCenter.addStore(details[1], products);
-                        }
-                    }
-                }
-                else if (input.matches("buy\\sfrom\\s.+")){
-                    if (shoppingCenter.containsStore(details[2]))
-                        shoppingCenter.sell(details[2],details[3],Integer.valueOf(details[4]));
-                    else
-                        error1();
-                }
-
-                else if (input.matches("buy\\sfor\\s.+")){
-                    if (isInvalidInput3(details)){
-                        error2();
-                    }
-                    else {
-                        if (shoppingCenter.containsStore(details[2]))
-                            shoppingCenter.buy(details[2], details[3], Integer.valueOf(details[4]), Integer.valueOf(details[5]));
-                        else
-                            error1();
-                    }
-                }
-
-                else if (input.matches("change\\sprice\\s.+")){
-                    if (isInvalidInput3(details))
-                        error2();
-                    else {
-                        if (shoppingCenter.containsStore(details[4]))
-                            shoppingCenter.changePrice(details[4], details[2], Integer.valueOf(details[5]));
-                        else
-                            error1();
-                    }
-                }
-
-                else if (input.matches("show\\s.+")){
-                    if(shoppingCenter.containsStore(details[1]))
-                        shoppingCenter.show(details[1]);
-                    else
-                        error1();
-                }
-                else
-                    error2();
-            }
-        }
+        DairyFarm dairyFarm = new DairyFarm();
+        dairyFarm.manageDairyFarm();
     }
 
 }
