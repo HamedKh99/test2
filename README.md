@@ -1,10 +1,10 @@
 # The Frontend
 
-## what is this?
+## What is this?
 
 Only god knows, maybe some of prophets know
 
-## how to do this?
+## How to do this?
 
 ```
 yarn
@@ -14,13 +14,13 @@ yarn dev
 
 it may works.
 
-## how to contribute?
+## How to contribute?
 
 
 ## Author
 
-**Rohit Jain**
+**Hamed Khanaki**
 
-- [Profile](https://github.com/rohit19060 "Rohit jain")
-- [Email](mailto:rohitjain19060@gmail.com?subject=Hi "Hi!")
-- [Website](https://kingtechnologies.in "Welcome")
+- [Profile](https://github.com/HamedKh99 "Hamed Khanaki")
+- [Email](mailto:goo.hamedacc@gmail.com?subject=Hi "Hi!")
+- [Website](https://sotoon.ir "Welcome")
